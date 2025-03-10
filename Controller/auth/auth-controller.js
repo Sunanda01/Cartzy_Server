@@ -1,7 +1,7 @@
 const User = require("../../Models/User");
 const jwt = require("jsonwebtoken");
-const bcrypt=require('bcryptjs');
-const SaltLevel = require('../../Config/config').SALT_LEVEL;
+const bcrypt = require("bcryptjs");
+const SaltLevel = require("../../Config/config").SALT_LEVEL;
 const JWTHASHVALUE = require("../../Config/config").JWTHASHVALUE;
 const JWTTOKENEXPIRY = require("../../Config/config").JWTTOKENEXPIRY;
 
@@ -12,10 +12,10 @@ const registerUser = async (req, res) => {
     if (existUser) {
       return res.json({ success: false, msg: "User Already Exists" });
     }
-    const Salt=await bcrypt.genSalt(Number(SaltLevel));
+    const Salt = await bcrypt.genSalt(Number(SaltLevel));
     const hashPassword = await bcrypt.hash(password, Salt);
     const newUser = new User({
-    userName,
+      userName,
       email,
       password: hashPassword,
     });
@@ -50,20 +50,41 @@ const loginUser = async (req, res) => {
       JWTHASHVALUE,
       { expiresIn: JWTTOKENEXPIRY }
     );
-    res.json({
-      success: true,
-      msg: "Logged In Successfully",
-      user: {
-        id: checkUser._id,
-        userName: checkUser.userName,
-        email: checkUser.email,
-        role: checkUser.role,
-      },
-    });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+      })
+      .json({
+        success: true,
+        msg: "Logged In Successfully",
+        user: {
+          id: checkUser._id,
+          userName: checkUser.userName,
+          email: checkUser.email,
+          role: checkUser.role,
+        },
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, msg: "Some Error Occured" });
   }
 };
 
-module.exports = { registerUser, loginUser };
+const checkAuth=async(req,res)=>{
+    const user=req.user;
+    res.status(200).json({
+        success:true,
+        msg:"Authenticated User",
+        user
+    })
+}
+
+const logoutUser = async (req, res) => {
+  res.clearCookie("token").json({
+    success: true,
+    msg: "Logged Out Successfully!",
+  });
+};
+
+module.exports = { registerUser, loginUser, logoutUser, checkAuth };
