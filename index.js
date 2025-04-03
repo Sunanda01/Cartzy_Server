@@ -7,6 +7,7 @@ const FRONTEND_URL = require("./Config/config").FRONTEND_URL;
 const authRoutes = require("./Routes/auth/authRoutes");
 const productRoutes=require("./Routes/admin/productRoutes");
 const shopProductRoutes=require("./Routes/shop/productRoutes");
+const cartRoutes=require("./Routes/shop/cartRoutes");
 const app = express();
 
 app.use(express.json());
@@ -35,6 +36,8 @@ app.use("/api/admin/products",productRoutes);
 
 //Shop Routes
 app.use("/api/shop/products",shopProductRoutes);
+
+app.use("/api/shop/cart",cartRoutes);
 
 app.listen(PORT, () => {
   connection();
