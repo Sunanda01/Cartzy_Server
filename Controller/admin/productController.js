@@ -1,4 +1,4 @@
-const { imageUploadUtil } = require("../../Middleware/cloudinary");
+const { imageUploadUtil } = require("../../Services/cloudinary");
 const Product = require("../../Models/Product");
 
 const handleImageUpload = async (req, res) => {

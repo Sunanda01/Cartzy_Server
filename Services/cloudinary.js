@@ -16,4 +16,4 @@ async function imageUploadUtil(file) {
     return result;
 }
 const upload=multer({storage});
-module.exports={upload,imageUploadUtil};
+module.exports={upload,cloudinary,imageUploadUtil}
