@@ -10,6 +10,7 @@ const shopProductRoutes=require("./Routes/shop/productRoutes");
 const cartRoutes=require("./Routes/shop/cartRoutes");
 const addressRoutes=require("./Routes/shop/addressRoutes");
 const orderRoutes=require("./Routes/shop/orderRoutes");
+const adminOrderRoutes=require("./Routes/admin/orderRoutes");
 const app = express();
 
 app.use(express.json());
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 
 //Admin Routes
 app.use("/api/admin/products",productRoutes);
+app.use("/api/admin/orders",adminOrderRoutes);
 
 //Shop Routes
 app.use("/api/shop/products",shopProductRoutes);

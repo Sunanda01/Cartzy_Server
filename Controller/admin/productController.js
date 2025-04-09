@@ -1,6 +1,7 @@
 const { imageUploadUtil } = require("../../Services/cloudinary");
 const Product = require("../../Models/Product");
 
+
 const handleImageUpload = async (req, res) => {
   try {
     const b64 = Buffer.from(req.file.buffer).toString("base64");
@@ -105,6 +106,9 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ success: false, msg: "Failed to Delete Product" });
   }
 };
+
+
+
 
 module.exports = {
   handleImageUpload,
