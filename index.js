@@ -11,6 +11,7 @@ const cartRoutes=require("./Routes/shop/cartRoutes");
 const addressRoutes=require("./Routes/shop/addressRoutes");
 const orderRoutes=require("./Routes/shop/orderRoutes");
 const adminOrderRoutes=require("./Routes/admin/orderRoutes");
+const searchProductsRoutes=require("./Routes/shop/searchRoutes");
 const app = express();
 
 app.use(express.json());
@@ -43,6 +44,7 @@ app.use("/api/shop/products",shopProductRoutes);
 app.use("/api/shop/cart",cartRoutes);
 app.use("/api/shop/address",addressRoutes);
 app.use("/api/shop/orders",orderRoutes);
+app.use("/api/shop/search",searchProductsRoutes);
 
 app.listen(PORT, () => {
   connection();
