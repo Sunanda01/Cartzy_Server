@@ -1,4 +1,5 @@
 const { searchProducts } = require('../../Controller/shop/searchController');
 const routes=require('express').Router();
-routes.get('/:keyword',searchProducts)
+const {verifyToken}= require('../../Middleware/verification');
+routes.get('/:keyword',verifyToken,searchProducts)
 module.exports=routes;

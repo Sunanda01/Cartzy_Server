@@ -7,10 +7,10 @@ const {
 } = require("../../Controller/shop/addressController");
 const {verifyToken}= require('../../Middleware/verification');
 
-routes.post("/add", addAddress);
-routes.get("/get/:userId", fetchAllAddress);
-routes.delete("/delete/:userId/:addressId", deleteAddress);
-routes.put("/update/:userId/:addressId", editAddress);
+routes.post("/add", verifyToken,addAddress);
+routes.get("/get/:userId", verifyToken,fetchAllAddress);
+routes.delete("/delete/:userId/:addressId",verifyToken, deleteAddress);
+routes.put("/update/:userId/:addressId",verifyToken, editAddress);
 
 module.exports = routes;
  
