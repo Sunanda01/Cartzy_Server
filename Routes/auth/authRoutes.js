@@ -5,7 +5,7 @@ const {
   logoutUser,
   checkAuth,
 } = require("../../Controller/auth/auth-controller");
-const verifyToken = require("../../Middleware/verifyToken");
+const {verifyToken} = require("../../Middleware/verification");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);

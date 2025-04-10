@@ -5,6 +5,7 @@ const {
   editAddress,
   deleteAddress,
 } = require("../../Controller/shop/addressController");
+const {verifyToken}= require('../../Middleware/verification');
 
 routes.post("/add", addAddress);
 routes.get("/get/:userId", fetchAllAddress);

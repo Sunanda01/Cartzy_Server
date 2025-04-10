@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const JWTHASHVALUE = require("../Config/config").JWTHASHVALUE;
+
 function verifyToken(req, res, next) {
   const token = req.cookies?.token;
   if (!token)
@@ -27,4 +28,19 @@ function verifyToken(req, res, next) {
     }
   }
 }
-module.exports=verifyToken;
+
+function verifyAdmin(req, res, next) {
+  try {
+    
+    if (req.user.role === "admin") {
+      return next();
+    }
+    return res.status(401).json({ success: false, msg: "Unauthorized User" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, msg: "Internal server Error" });
+  }
+}
+
+module.exports = { verifyToken, verifyAdmin };

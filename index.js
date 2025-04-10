@@ -14,6 +14,7 @@ const adminOrderRoutes=require("./Routes/admin/orderRoutes");
 const searchProductsRoutes=require("./Routes/shop/searchRoutes");
 const shopReviewRoutes=require("./Routes/shop/reviewRoutes")
 const featureRoutes=require('./Routes/common/featureRoutes');
+const redisConnection=require('./Utils/redisConnection');
 const app = express();
 
 app.use(express.json());
@@ -52,7 +53,8 @@ app.use("/api/shop/search",searchProductsRoutes);
 app.use("/api/shop/review",shopReviewRoutes);
 
 
-app.listen(PORT, () => {
-  connection();
+app.listen(PORT, async() => {
+  await connection();
+  await redisConnection;
   console.log(`PORT Connected @ ${PORT}`);
 });

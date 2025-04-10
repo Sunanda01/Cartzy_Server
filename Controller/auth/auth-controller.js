@@ -48,7 +48,7 @@ const loginUser = async (req, res) => {
         role: checkUser.role,
       },
       JWTHASHVALUE,
-      { expiresIn: JWTTOKENEXPIRY }
+      { expiresIn: '10S' }
     );
     res
       .cookie("token", token, {
