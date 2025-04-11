@@ -4,11 +4,17 @@ const bcrypt = require("bcryptjs");
 const SaltLevel = require("../../Config/config").SALT_LEVEL;
 const JWTHASHVALUE = require("../../Config/config").JWTHASHVALUE;
 const JWTTOKENEXPIRY = require("../../Config/config").JWTTOKENEXPIRY;
-
+const {
+  registerValidationSchema,
+  loginValidationSchema,
+} = require("../../Validators");
+// const redis_client = require("../../Utils/redisConnection");
 const registerUser = async (req, res) => {
-  const { userName, email, password } = req.body;
   try {
-    existUser = await User.findOne({ email });
+    await registerValidationSchema.validateAsync(req.body);
+    const { userName, email, password } = req.body;
+
+    const existUser = await User.findOne({ email });
     if (existUser) {
       return res.json({ success: false, msg: "User Already Exists" });
     }
@@ -24,7 +30,11 @@ const registerUser = async (req, res) => {
       .status(200)
       .json({ success: true, msg: "User Registered Successfully" });
   } catch (err) {
-    console.error(err);
+    if (err.isJoi) {
+      return res
+        .status(400)
+        .json({ success: false, msg: err.details[0].message });
+    }
     res.status(500).json({ success: false, msg: "Some Error Occured" });
   }
 };
@@ -33,52 +43,68 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const checkUser = await User.findOne({ email });
-    if (!checkUser) {
-      return res.json({ success: false, msg: "User Not Found" });
-    }
-    const checkPassword = await bcrypt.compare(password, checkUser.password);
-    if (!checkPassword) {
-      return res.json({ success: false, msg: "Incorrect password!!!!" });
-    }
+    if (!checkUser)
+      return res.json({
+        success: false,
+        msg: "User doesn't exists! Please register first",
+      });
+
+    const checkPasswordMatch = await bcrypt.compare(
+      password,
+      checkUser.password
+    );
+    if (!checkPasswordMatch)
+      return res.json({
+        success: false,
+        msg: "Incorrect password! Please try again",
+      });
+
     const token = jwt.sign(
       {
         id: checkUser._id,
-        userName: checkUser.userName,
-        email: checkUser.email,
         role: checkUser.role,
+        email: checkUser.email,
+        userName: checkUser.userName,
       },
       JWTHASHVALUE,
-      { expiresIn: '10S' }
+      { expiresIn: JWTTOKENEXPIRY }
     );
+
     res
       .cookie("token", token, {
         httpOnly: true,
         secure: false,
+        sameSite: "Lax",
+        maxAge: 86400000, // 1 day
       })
       .json({
         success: true,
-        msg: "Logged In Successfully",
+        msg: "Logged in successfully",
         user: {
-          id: checkUser._id,
-          userName: checkUser.userName,
           email: checkUser.email,
           role: checkUser.role,
+          id: checkUser._id,
+          userName: checkUser.userName,
         },
       });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, msg: "Some Error Occured" });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      msg: "Some error occurred",
+    });
   }
 };
 
-const checkAuth=async(req,res)=>{
-    const user=req.user;
-    res.status(200).json({
-        success:true,
-        msg:"Authenticated User",
-        user
-    })
-}
+const checkAuth = async (req, res) => {
+  console.log(req.user.role);
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    msg: "Authenticated User",
+    user,
+  });
+};
 
 const logoutUser = async (req, res) => {
   res.clearCookie("token").json({

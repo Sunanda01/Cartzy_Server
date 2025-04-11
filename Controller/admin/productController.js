@@ -1,6 +1,9 @@
 const { imageUploadUtil } = require("../../Services/cloudinary");
 const Product = require("../../Models/Product");
-
+const {
+  productValidationSchema,
+  updateProductValidationSchema,
+} = require("../../Validators");
 
 const handleImageUpload = async (req, res) => {
   try {
@@ -16,6 +19,7 @@ const handleImageUpload = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
+    await productValidationSchema.validateAsync(req.body);
     const {
       image,
       title,
@@ -41,7 +45,11 @@ const addProduct = async (req, res) => {
       .status(201)
       .json({ success: true, msg: "Product Added", data: newlyCreatedProduct });
   } catch (err) {
-    console.error(err);
+    if (err.isJoi) {
+      return res
+        .status(400)
+        .json({ success: false, msg: err.details[0].message });
+    }
     res.status(500).json({ success: false, msg: "Failed to Add Product" });
   }
 };
@@ -58,9 +66,9 @@ const fetchAllProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
+    await updateProductValidationSchema.validateAsync(req.body);
     const { id } = req.params;
     const {
-      image,
       title,
       description,
       category,
@@ -77,17 +85,20 @@ const editProduct = async (req, res) => {
     findProduct.description = description || findProduct.description;
     findProduct.category = category || findProduct.category;
     findProduct.brand = brand || findProduct.brand;
-    findProduct.price = price === "" ? 0 : price || findProduct.price;
-    findProduct.salePrice =
-      salePrice === "" ? 0 : salePrice || findProduct.salePrice;
-    findProduct.totalStock = totalStock || findProduct.totalStock;
-    findProduct.image = image || findProduct.image;
+    findProduct.price = price ?? findProduct.price;
+    findProduct.salePrice = salePrice ?? findProduct.salePrice;
+    findProduct.totalStock = totalStock ?? findProduct.totalStock;
+
     await findProduct.save();
     res
       .status(200)
       .json({ success: true, msg: "Product Updated Successfully" });
   } catch (err) {
-    console.error(err);
+    if (err.isJoi) {
+      return res
+        .status(400)
+        .json({ success: false, msg: err.details[0].message });
+    }
     res.status(500).json({ success: false, msg: "Failed to Edit Product" });
   }
 };
@@ -106,9 +117,6 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ success: false, msg: "Failed to Delete Product" });
   }
 };
-
-
-
 
 module.exports = {
   handleImageUpload,

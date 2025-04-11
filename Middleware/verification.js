@@ -1,46 +1,40 @@
 const jwt = require("jsonwebtoken");
 const JWTHASHVALUE = require("../Config/config").JWTHASHVALUE;
+// const redis_client = require("../Utils/redisConnection");
+// const User = require("../Models/User");
 
 function verifyToken(req, res, next) {
   const token = req.cookies?.token;
-  if (!token)
+  if (!token) {
     return res.status(401).json({
       success: false,
       msg: "Unauthorised User!",
     });
-  else {
-    try {
-      jwt.verify(token, JWTHASHVALUE, function (err, user) {
-        if (err) {
-          return res.status(401).json({
-            success: false,
-            msg: "Token Invalid!",
-          });
-        }
-        req.user = user;
-        next();
-      });
-    } catch (err) {
-      return res.status(401).json({
-        success: false,
-        msg: "Unauthorised User!",
-      });
-    }
   }
-}
-
-function verifyAdmin(req, res, next) {
   try {
-    
-    if (req.user.role === "admin") {
-      return next();
-    }
-    return res.status(401).json({ success: false, msg: "Unauthorized User" });
+    const user = jwt.verify(token, JWTHASHVALUE);
+    req.user = user;
+    next();
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, msg: "Internal server Error" });
+    return res.status(401).json({
+      success: false,
+      msg: "Token Invalid!",
+    });
   }
 }
 
-module.exports = { verifyToken, verifyAdmin };
+// function verifyAdmin(req, res, next) {
+//   try {
+//     if (req.user && req.user.role === "admin") {
+//       return next();
+//     }
+//     return res.status(401).json({ success: false, msg: "Unauthorized User" });
+//   } catch (err) {
+//     return res
+//       .status(500)
+//       .json({ success: false, msg: "Internal Server Error" });
+//   }
+// }
+
+
+module.exports = { verifyToken};

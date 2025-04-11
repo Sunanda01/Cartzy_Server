@@ -1,7 +1,8 @@
 const Address = require("../../Models/Address");
-
+const {addressValidationSchema}=require('../../Validators')
 const addAddress = async (req, res) => {
   try {
+    await addressValidationSchema.validateAsync(req.body);
     const { userId, address, city, pincode, phone, notes } = req.body;
     if (!userId || !address || !city || !pincode || !phone || !notes) {
       return res.status(400).json({
@@ -26,7 +27,12 @@ const addAddress = async (req, res) => {
       data: newlyCreatedAddress,
       msg: "New Address Added",
     });
-  } catch (e) {
+  } catch (err) {
+    if (err.isJoi) {
+      return res
+        .status(400)
+        .json({ success: false, msg: err.details[0].message });
+    }
     res.status(500).json({
       success: false,
       msg: "Failed to add address",
