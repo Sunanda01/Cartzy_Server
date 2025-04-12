@@ -4,7 +4,7 @@ const Product = require("../../Models/Product");
 const Cart = require("../../Models/Cart");
 const client = require("../../Services/paypal");
 const FRONTEND_URL = require("../../Config/config").FRONTEND_URL;
-
+const redis_client = require("../../Utils/redisConnection");
 const createOrder = async (req, res) => {
   try {
     const {
@@ -127,9 +127,13 @@ const capturePayment = async (req, res) => {
       await product.save();
     }
 
-    await Cart.findByIdAndDelete(order.cartId);
+    const cart=await Cart.findByIdAndDelete(order.cartId);
     await order.save();
-
+    const redis_exists=await redis_client.exists('all_orderList');
+    if(redis_exists){
+      await redis_client.del('all_orderList');
+      await redis_client.del(`${cart.userId}_orderList`);
+    }
     res.status(200).json({
       success: true,
       msg: "Order confirmed",
@@ -145,6 +149,15 @@ const capturePayment = async (req, res) => {
 const getAllOrdersByUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    const redis_data = await redis_client.get(`${userId}_orderList`);
+    if (redis_data) {
+      const parsed_data = JSON.parse(redis_data);
+      console.log("Client Order From Redis!!!!!!!!")
+      return res.status(200).json({
+        success: true,
+        data: parsed_data.data,
+      });
+    }
 
     const orders = await Order.find({ userId });
 
@@ -154,6 +167,14 @@ const getAllOrdersByUser = async (req, res) => {
         msg: "No orders found!",
       });
     }
+    await redis_client.set(
+      `${userId}_orderList`,
+      JSON.stringify({
+        data: orders,
+      }),
+      "EX",
+      1800
+    );
 
     res.status(200).json({
       success: true,
@@ -171,6 +192,12 @@ const getAllOrdersByUser = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const { id } = req.params;
+    const redis_data = await redis_client.get(`${id}_order_details`);
+    if (redis_data) {
+      const parsed_data = JSON.parse(redis_data);
+      console.log(`${id} User Order Details From Redis!!!!!!!!`);
+      return res.status(200).json({ success: true, data: parsed_data.data });
+    }
     const order = await Order.findById(id);
 
     if (!order) {
@@ -179,7 +206,14 @@ const getOrderDetails = async (req, res) => {
         msg: "Order not found!",
       });
     }
-
+    await redis_client.set(
+      `${id}_order_details`,
+      JSON.stringify({
+        data: order,
+      }),
+      "EX",
+      1800
+    );
     res.status(200).json({
       success: true,
       data: order,

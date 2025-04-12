@@ -8,7 +8,7 @@ const {
 const {verifyToken} = require("../../Middleware/verification");
 
 router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/login",loginUser);
 router.post("/logout", logoutUser);
 router.get("/check-auth",verifyToken,checkAuth);
 

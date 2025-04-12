@@ -8,7 +8,7 @@ const {
   registerValidationSchema,
   loginValidationSchema,
 } = require("../../Validators");
-// const redis_client = require("../../Utils/redisConnection");
+const redis_client = require("../../Utils/redisConnection");
 const registerUser = async (req, res) => {
   try {
     await registerValidationSchema.validateAsync(req.body);
@@ -40,6 +40,7 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
+  await loginValidationSchema.validateAsync(req.body);
   const { email, password } = req.body;
   try {
     const checkUser = await User.findOne({ email });
@@ -70,6 +71,13 @@ const loginUser = async (req, res) => {
       { expiresIn: JWTTOKENEXPIRY }
     );
 
+    await redis_client.set(token, JSON.stringify({
+      id: checkUser._id,
+      userName: checkUser.userName,
+      email: checkUser.email,
+      role: checkUser.role,
+}), 'EX', 1800);
+
     res
       .cookie("token", token, {
         httpOnly: true,
@@ -87,8 +95,12 @@ const loginUser = async (req, res) => {
           userName: checkUser.userName,
         },
       });
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    if (err.isJoi) {
+      return res
+        .status(400)
+        .json({ success: false, msg: err.details[0].message });
+    }
     res.status(500).json({
       success: false,
       msg: "Some error occurred",
