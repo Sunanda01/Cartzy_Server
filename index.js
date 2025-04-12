@@ -56,5 +56,5 @@ app.use("/api/shop/review",shopReviewRoutes);
 app.listen(PORT, async() => {
   await connection();
   await redisConnection;
-  console.log(`PORT Connected @ ${PORT}`);
+  // console.log(`PORT Connected @ ${PORT}`);
 });

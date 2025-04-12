@@ -87,7 +87,7 @@ const createOrder = async (req, res) => {
       paymentId: newOrder.paymentId,
     });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({
       success: false,
       msg: "Error creating PayPal order",
@@ -141,7 +141,7 @@ const capturePayment = async (req, res) => {
       captureResult: captureResponse.result,
     });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Payment capture failed" });
   }
 };
@@ -152,7 +152,6 @@ const getAllOrdersByUser = async (req, res) => {
     const redis_data = await redis_client.get(`${userId}_orderList`);
     if (redis_data) {
       const parsed_data = JSON.parse(redis_data);
-      console.log("Client Order From Redis!!!!!!!!")
       return res.status(200).json({
         success: true,
         data: parsed_data.data,
@@ -181,7 +180,7 @@ const getAllOrdersByUser = async (req, res) => {
       data: orders,
     });
   } catch (e) {
-    console.log(e);
+    
     res.status(500).json({
       success: false,
       msg: "Some error occured!",
@@ -195,7 +194,6 @@ const getOrderDetails = async (req, res) => {
     const redis_data = await redis_client.get(`${id}_order_details`);
     if (redis_data) {
       const parsed_data = JSON.parse(redis_data);
-      console.log(`${id} User Order Details From Redis!!!!!!!!`);
       return res.status(200).json({ success: true, data: parsed_data.data });
     }
     const order = await Order.findById(id);
@@ -219,7 +217,7 @@ const getOrderDetails = async (req, res) => {
       data: order,
     });
   } catch (e) {
-    console.log(e);
+    
     res.status(500).json({
       success: false,
       msg: "Some error occured!",

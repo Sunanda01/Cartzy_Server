@@ -26,7 +26,7 @@ const Product = require("../../Models/Product");
     await cart.save();
     res.status(200).json({ success: true, msg: "Added to Cart",data:cart});
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Add" });
   }
 };
@@ -65,7 +65,7 @@ const Product = require("../../Models/Product");
       data: { ...cart._doc, items: populateCartItems },
     });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Fetch" });
   }
 };
@@ -107,7 +107,7 @@ const Product = require("../../Models/Product");
       data: { ...cart._doc, items: populateCartItems },
     });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Update" });
   }
 };
@@ -150,7 +150,7 @@ const Product = require("../../Models/Product");
         data: { ...cart._doc, items: populateCartItems },
       });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Delete" });
   }
 };

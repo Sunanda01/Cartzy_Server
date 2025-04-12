@@ -12,7 +12,6 @@ const handleImageUpload = async (req, res) => {
     const result = await imageUploadUtil(url);
     res.json({ success: true, result });
   } catch (err) {
-    console.error(err);
     res.json({ success: false, msg: "Error Occurred" });
   }
 };
@@ -59,7 +58,7 @@ const fetchAllProduct = async (req, res) => {
     const listOfProduct = await Product.find({});
     res.status(200).json({ success: true, data: listOfProduct });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Fetch Product" });
   }
 };
@@ -113,7 +112,7 @@ const deleteProduct = async (req, res) => {
       .status(200)
       .json({ success: true, msg: "Product Deleted Successfully" });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to Delete Product" });
   }
 };

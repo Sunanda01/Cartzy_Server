@@ -24,7 +24,6 @@ const searchProducts = async (req, res) => {
       data: searchResults,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       msg: "Error",

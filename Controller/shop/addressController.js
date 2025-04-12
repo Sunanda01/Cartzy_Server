@@ -57,7 +57,7 @@ const fetchAllAddress = async (req, res) => {
       msg: "Saved Address",
     });
   } catch (e) {
-    console.log(e);
+    
     res.status(500).json({
       success: false,
       msg: "Failed to fetch address",
@@ -99,7 +99,7 @@ const editAddress = async (req, res) => {
       msg: "Address updated successfully",
     });
   } catch (e) {
-    console.log(e);
+    
     res.status(500).json({
       success: false,
       msg: "Failed to update Address",
@@ -131,7 +131,7 @@ const deleteAddress = async (req, res) => {
       msg: "Address deleted successfully",
     });
   } catch (e) {
-    console.log(e);
+    
     res.status(500).json({
       success: false,
       msg: "Failed to delete Address",

@@ -39,7 +39,7 @@ const getFilteredProduct = async (req, res) => {
       .status(200)
       .json({ success: true, msg: "Products Fetched", data: products });
   } catch (err) {
-    console.error(err);
+    or(err);
     res.status(500).json({ success: false, msg: "Failed to fetch product" });
   }
 };
@@ -53,7 +53,7 @@ const getProductDetails=async(req,res)=>{
         res.status(200).json({success:true,data:product});
     }
     catch(err){
-        console.error(err);
+        or(err);
         res.status(500).json({success:false,msg:"Failed to get details"});
     }
 }

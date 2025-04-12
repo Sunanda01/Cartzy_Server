@@ -15,7 +15,6 @@ async function verifyToken(req, res, next) {
     const decoded = jwt.verify(token, JWTHASHVALUE);
     const redis_exists = await redis_client.exists(token);
     if (redis_exists) {
-      console.log("Data From Redis!!!!!!!!");
       const redis_data = await redis_client.get(token);
       req.user = JSON.parse(redis_data);
       return next();
