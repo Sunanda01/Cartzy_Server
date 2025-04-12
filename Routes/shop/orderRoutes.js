@@ -5,11 +5,11 @@ const {
   getOrderDetails,
   capturePayment,
 } = require("../../Controller/shop/orderController");
-const {verifyToken}= require('../../Middleware/verification');
+const { verifyToken } = require("../../Middleware/verification");
 
-routes.post("/create",  createOrder);
-routes.post("/capture",  capturePayment);
+routes.post("/create", verifyToken, createOrder);
+routes.post("/capture", verifyToken, capturePayment);
 routes.get("/list/:userId", verifyToken, getAllOrdersByUser);
-routes.get("/details/:id",  getOrderDetails);
+routes.get("/details/:id", verifyToken, getOrderDetails);
 
 module.exports = routes;
