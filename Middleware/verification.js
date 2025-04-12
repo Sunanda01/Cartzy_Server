@@ -23,18 +23,18 @@ function verifyToken(req, res, next) {
   }
 }
 
-// function verifyAdmin(req, res, next) {
-//   try {
-//     if (req.user && req.user.role === "admin") {
-//       return next();
-//     }
-//     return res.status(401).json({ success: false, msg: "Unauthorized User" });
-//   } catch (err) {
-//     return res
-//       .status(500)
-//       .json({ success: false, msg: "Internal Server Error" });
-//   }
-// }
+function verifyAdmin(req, res, next) {
+  try {
+    if (req.user && req.user.role === "admin") {
+      return next();
+    }
+    return res.status(401).json({ success: false, msg: "Unauthorized User" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, msg: "Internal Server Error" });
+  }
+}
 
 
-module.exports = { verifyToken};
+module.exports = { verifyToken,verifyAdmin};

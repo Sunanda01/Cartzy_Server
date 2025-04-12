@@ -97,7 +97,6 @@ const loginUser = async (req, res) => {
 };
 
 const checkAuth = async (req, res) => {
-  console.log(req.user.role);
   const user = req.user;
   res.status(200).json({
     success: true,
