@@ -9,7 +9,7 @@ const { verifyToken } = require("../../Middleware/verification");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/logout", verifyToken, logoutUser);
+router.post("/logout", logoutUser);
 router.get("/check-auth", verifyToken, checkAuth);
 
 module.exports = router;
