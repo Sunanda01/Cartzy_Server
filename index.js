@@ -16,7 +16,7 @@ const shopReviewRoutes=require("./Routes/shop/reviewRoutes")
 const featureRoutes=require('./Routes/common/featureRoutes');
 const redisConnection=require('./Utils/redisConnection');
 const app = express();
-
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
@@ -33,7 +33,6 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 //Auth Routes
 app.use("/api/auth", authRoutes);
