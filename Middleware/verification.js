@@ -8,7 +8,7 @@ async function verifyToken(req, res, next) {
   if (!token)
     return res.status(401).json({
       success: false,
-      msg: "Unauthorised User!",
+      msg: "Token Not Found",
     });
 
   try {
@@ -34,7 +34,7 @@ async function verifyToken(req, res, next) {
   } catch (err) {
     return res.status(401).json({
       success: false,
-      msg: "Unauthorised User!",
+      msg: "Unauthorised User !",
     });
   }
 }
