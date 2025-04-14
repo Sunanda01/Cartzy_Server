@@ -3,7 +3,7 @@ const {
   addFeatureImage,
   getFeatureImages,
 } = require("../../Controller/admin/featureContoller");
-
-routes.post("/add", addFeatureImage);
-routes.get("/get", getFeatureImages);
+const { verifyToken, verifyAdmin } = require("../../Middleware/verification");
+routes.post("/add", verifyToken, verifyAdmin, addFeatureImage);
+routes.get("/get", verifyToken, verifyAdmin, getFeatureImages);
 module.exports = routes;

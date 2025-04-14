@@ -4,7 +4,6 @@ const customErrorHandler = require("../../Services/customErrorHandler");
 const getAllOrder = async (req, res, next) => {
   try {
     const order = await Order.find();
-
     if (!order) return next(customErrorHandler.notFound("No Orders Found"));
     const redis_data = await redis_client.get(`all_orderList`);
     if (redis_data) {

@@ -19,7 +19,11 @@ const handleImageUpload = async (req, res, next) => {
 
 const addProduct = async (req, res, next) => {
   try {
-    await productValidationSchema.validateAsync(req.body);
+    const { error } = productValidationSchema.validate(req.body);
+      if (error) {
+        return next(error);
+      }
+    // await productValidationSchema.validateAsync(req.body);
     const {
       image,
       title,
@@ -60,7 +64,11 @@ const fetchAllProduct = async (req, res, next) => {
 
 const editProduct = async (req, res, next) => {
   try {
-    await updateProductValidationSchema.validateAsync(req.body);
+    const { error } = updateProductValidationSchema.validate(req.body);
+      if (error) {
+        return next(error);
+      }
+    // await updateProductValidationSchema.validateAsync(req.body);
     const { id } = req.params;
     const {
       title,

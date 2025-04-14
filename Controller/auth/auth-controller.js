@@ -13,7 +13,11 @@ const customErrorHandler = require("../../Services/customErrorHandler");
 
 const registerUser = async (req, res, next) => {
   try {
-    await registerValidationSchema.validateAsync(req.body);
+    const { error } = registerValidationSchema.validate(req.body);
+    if (error) {
+      return next(error);
+    }
+    // await registerValidationSchema.validateAsync(req.body);
     const { userName, email, password } = req.body;
 
     const existUser = await User.findOne({ email });
@@ -28,21 +32,55 @@ const registerUser = async (req, res, next) => {
       password: hashPassword,
     });
     await newUser.save();
-    res
-      .status(200)
-      .json({ success: true, msg: "User Registered Successfully" });
+    const payload = {
+      user: {
+        id: newUser._id,
+        role: newUser.role,
+        email: newUser.email,
+        userName: newUser.userName,
+      },
+    };
+    const token = jwt.sign(payload, JWTHASHVALUE, {
+      expiresIn: JWTTOKENEXPIRY,
+    });
+    await redis_client.set(
+      token,
+      JSON.stringify({
+        id: newUser._id,
+        userName: newUser.userName,
+        email: newUser.email,
+        role: newUser.role,
+      }),
+      "EX",
+      1800
+    );
+    res.status(200).json({
+      success: true,
+      msg: "User Registered Successfully",
+      token,
+      data: {
+        id: newUser._id,
+        userName: newUser.userName,
+        email: newUser.email,
+        role: newUser.role,
+      },
+    });
   } catch (error) {
     next(error);
   }
 };
 
 const loginUser = async (req, res, next) => {
-  await loginValidationSchema.validateAsync(req.body);
+  // await loginValidationSchema.validateAsync(req.body);
+  const { error } = loginValidationSchema.validate(req.body);
+  if (error) {
+    return next(error);
+  }
   const { email, password } = req.body;
   try {
     const checkUser = await User.findOne({ email });
     if (!checkUser)
-      return res.json({
+      return res.status(401).json({
         success: false,
         msg: "User doesn't exists! Please register first",
       });
@@ -58,17 +96,17 @@ const loginUser = async (req, res, next) => {
         )
       );
 
-    const token = jwt.sign(
-      {
+    const payload = {
+      user: {
         id: checkUser._id,
         role: checkUser.role,
         email: checkUser.email,
         userName: checkUser.userName,
       },
-      JWTHASHVALUE,
-      { expiresIn: JWTTOKENEXPIRY }
-    );
-
+    };
+    const token = jwt.sign(payload, JWTHASHVALUE, {
+      expiresIn: JWTTOKENEXPIRY,
+    });
     await redis_client.set(
       token,
       JSON.stringify({
@@ -81,24 +119,17 @@ const loginUser = async (req, res, next) => {
       1800
     );
 
-    res
-      // .cookie("token", token, {
-      //   httpOnly: true,
-      //   secure: false,
-      //   sameSite: "None",
-      //   maxAge: 7 * 24 * 60 * 60 * 1000,
-      // })
-      .json({
-        success: true,
-        msg: "Logged in successfully",
-        user: {
-          email: checkUser.email,
-          role: checkUser.role,
-          id: checkUser._id,
-          userName: checkUser.userName,
-        },
-        token,
-      });
+    res.json({
+      success: true,
+      msg: "Logged in successfully",
+      token,
+      data: {
+        id: checkUser._id,
+        userName: checkUser.userName,
+        email: checkUser.email,
+        role: checkUser.role,
+      },
+    });
   } catch (error) {
     next(error);
   }

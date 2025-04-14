@@ -6,8 +6,8 @@ const {
 } = require("../../Controller/shop/cartController");
 const routes = require("express").Router();
 const { verifyToken } = require("../../Middleware/verification");
-routes.post("/add", addToCart);
-routes.get("/get/:userId", fetchCart);
-routes.put("/update-cart", updateCart);
-routes.delete("/:userId/:productId", deleteCart);
+routes.post("/add", verifyToken, addToCart);
+routes.get("/get/:userId", verifyToken, fetchCart);
+routes.put("/update-cart", verifyToken, updateCart);
+routes.delete("/:userId/:productId", verifyToken, deleteCart);
 module.exports = routes;

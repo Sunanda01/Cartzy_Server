@@ -3,7 +3,11 @@ const { addressValidationSchema } = require("../../Validators");
 
 const addAddress = async (req, res, next) => {
   try {
-    await addressValidationSchema.validateAsync(req.body);
+    const { error } = addressValidationSchema.validate(req.body);
+      if (error) {
+        return next(error);
+      }
+    // await addressValidationSchema.validateAsync(req.body);
     const { userId, address, city, pincode, phone, notes } = req.body;
     if (!userId || !address || !city || !pincode || !phone || !notes) {
       return res.status(400).json({
@@ -56,6 +60,10 @@ const fetchAllAddress = async (req, res, next) => {
 
 const editAddress = async (req, res, next) => {
   try {
+    const { error } = addressValidationSchema.validate(req.body);
+      if (error) {
+        return next(error);
+      }
     const { userId, addressId } = req.params;
     const formData = req.body;
 

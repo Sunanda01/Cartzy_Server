@@ -15,6 +15,9 @@ const searchProductsRoutes=require("./Routes/shop/searchRoutes");
 const shopReviewRoutes=require("./Routes/shop/reviewRoutes")
 const featureRoutes=require('./Routes/common/featureRoutes');
 const redisConnection=require('./Utils/redisConnection');
+const errorHandler=require('./Middleware/errorHandler');
+const healthcheckroute = require("./Routes/health");
+
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
@@ -34,6 +37,9 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 
+//HealthCheck
+app.use("/api",healthcheckroute);
+
 //Auth Routes
 app.use("/api/auth", authRoutes);
 
@@ -51,9 +57,11 @@ app.use("/api/shop/orders",orderRoutes);
 app.use("/api/shop/search",searchProductsRoutes);
 app.use("/api/shop/review",shopReviewRoutes);
 
+//errorHandler
+app.use(errorHandler);
 
 app.listen(PORT, async() => {
   await connection();
   await redisConnection;
-  // console.log(`PORT Connected @ ${PORT}`);
+  console.log(`PORT Connected @ ${PORT}`);
 });
