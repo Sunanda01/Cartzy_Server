@@ -1,6 +1,6 @@
 const Feature = require("../../Models/Feature");
 
-const addFeatureImage = async (req, res) => {
+const addFeatureImage = async (req, res, next) => {
   try {
     const { image } = req.body;
     const featureImages = new Feature({
@@ -12,15 +12,12 @@ const addFeatureImage = async (req, res) => {
       data: featureImages,
       msg: "Feature Image Added",
     });
-  } catch (e) {
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured!",
-    });
+  } catch (error) {
+    next(err);
   }
 };
 
-const getFeatureImages = async (req, res) => {
+const getFeatureImages = async (req, res, next) => {
   try {
     const images = await Feature.find({});
 
@@ -28,11 +25,8 @@ const getFeatureImages = async (req, res) => {
       success: true,
       data: images,
     });
-  } catch (e) {
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured!",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

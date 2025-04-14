@@ -2,9 +2,9 @@ const jwt = require("jsonwebtoken");
 const JWTHASHVALUE = require("../Config/config").JWTHASHVALUE;
 const redis_client = require("../Utils/redisConnection");
 const User = require("../Models/User");
+const CustomErrorHandler = require("../Services/customErrorHandler");
 
 async function verifyToken(req, res, next) {
-  // const token =localStorage.getItem('userToken');
   let token;
   if (
     req.headers.authorization &&
@@ -12,17 +12,11 @@ async function verifyToken(req, res, next) {
   ) {
     token = req.headers.authorization.split(" ")[1];
   } else {
-    return res.status(401).json({
-      success: false,
-      msg: "Not authorised, no token provieded",
-    });
+    return next(
+      CustomErrorHandler.unAuthorized("Not authorised, no token provided")
+    );
   }
-  if (!token)
-    return res.status(401).json({
-      success: false,
-      msg: "Token Not Found",
-    });
-
+  if (!token) next(CustomErrorHandler.notFound("Token Not Found"));
   try {
     const decoded = jwt.verify(token, JWTHASHVALUE);
     const redis_exists = await redis_client.exists(token);
@@ -34,20 +28,12 @@ async function verifyToken(req, res, next) {
 
     // fallback if Redis doesn't have the token
     const user = await User.findById(decoded.id).select("-password");
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        msg: "User not found!",
-      });
-    } 
+    if (!user) next(CustomErrorHandler.notFound("User Not Found"));
 
     req.user = user;
     next();
-  } catch (err) {
-    return res.status(401).json({
-      success: false,
-      msg: "Unauthorised User !",
-    });
+  } catch (error) {
+    next(error);
   }
 }
 
@@ -75,7 +61,7 @@ async function verifyToken(req, res, next) {
 //         success: false,
 //         msg: "User not found!",
 //       });
-//     } 
+//     }
 
 //     req.user = user;
 //     next();
@@ -87,17 +73,14 @@ async function verifyToken(req, res, next) {
 //   }
 // }
 
-
 function verifyAdmin(req, res, next) {
   try {
     if (req.user && req.user.role === "admin") {
-       next();
+      next();
     }
-    return res.status(401).json({ success: false, msg: "Unauthorized User" });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, msg: "Internal Server Error" });
+    return next(CustomErrorHandler.unAuthorized("Unauthorized user"));
+  } catch (error) {
+    return next(error);
   }
 }
-module.exports = { verifyToken,verifyAdmin};
+module.exports = { verifyToken, verifyAdmin };

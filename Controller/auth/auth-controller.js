@@ -9,14 +9,16 @@ const {
   loginValidationSchema,
 } = require("../../Validators");
 const redis_client = require("../../Utils/redisConnection");
-const registerUser = async (req, res) => {
+const customErrorHandler = require("../../Services/customErrorHandler");
+
+const registerUser = async (req, res, next) => {
   try {
     await registerValidationSchema.validateAsync(req.body);
     const { userName, email, password } = req.body;
 
     const existUser = await User.findOne({ email });
     if (existUser) {
-      return res.json({ success: false, msg: "User Already Exists" });
+      return next(customErrorHandler.alreadyExist("User Already Exists"));
     }
     const Salt = await bcrypt.genSalt(Number(SaltLevel));
     const hashPassword = await bcrypt.hash(password, Salt);
@@ -29,17 +31,12 @@ const registerUser = async (req, res) => {
     res
       .status(200)
       .json({ success: true, msg: "User Registered Successfully" });
-  } catch (err) {
-    if (err.isJoi) {
-      return res
-        .status(400)
-        .json({ success: false, msg: err.details[0].message });
-    }
-    res.status(500).json({ success: false, msg: "Some Error Occured" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   await loginValidationSchema.validateAsync(req.body);
   const { email, password } = req.body;
   try {
@@ -55,10 +52,11 @@ const loginUser = async (req, res) => {
       checkUser.password
     );
     if (!checkPasswordMatch)
-      return res.json({
-        success: false,
-        msg: "Incorrect password! Please try again",
-      });
+      return next(
+        customErrorHandler.wrongCredentials(
+          "Incorrect password! Please try again"
+        )
+      );
 
     const token = jwt.sign(
       {
@@ -71,19 +69,24 @@ const loginUser = async (req, res) => {
       { expiresIn: JWTTOKENEXPIRY }
     );
 
-    await redis_client.set(token, JSON.stringify({
-      id: checkUser._id,
-      userName: checkUser.userName,
-      email: checkUser.email,
-      role: checkUser.role,
-}), 'EX', 1800);
+    await redis_client.set(
+      token,
+      JSON.stringify({
+        id: checkUser._id,
+        userName: checkUser.userName,
+        email: checkUser.email,
+        role: checkUser.role,
+      }),
+      "EX",
+      1800
+    );
 
     res
       // .cookie("token", token, {
       //   httpOnly: true,
       //   secure: false,
       //   sameSite: "None",
-      //   maxAge: 7 * 24 * 60 * 60 * 1000, 
+      //   maxAge: 7 * 24 * 60 * 60 * 1000,
       // })
       .json({
         success: true,
@@ -94,22 +97,14 @@ const loginUser = async (req, res) => {
           id: checkUser._id,
           userName: checkUser.userName,
         },
-        token
+        token,
       });
-  } catch (err) {
-    if (err.isJoi) {
-      return res
-        .status(400)
-        .json({ success: false, msg: err.details[0].message });
-    }
-    res.status(500).json({
-      success: false,
-      msg: "Some error occurred",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const checkAuth = async (req, res) => {
+const checkAuth = async (req, res, next) => {
   const user = req.user;
   res.status(200).json({
     success: true,
@@ -118,7 +113,7 @@ const checkAuth = async (req, res) => {
   });
 };
 
-const logoutUser = async (req, res) => {
+const logoutUser = async (req, res, next) => {
   res.clearCookie("token").json({
     success: true,
     msg: "Logged Out Successfully!",

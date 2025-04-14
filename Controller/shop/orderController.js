@@ -5,7 +5,9 @@ const Cart = require("../../Models/Cart");
 const client = require("../../Services/paypal");
 const FRONTEND_URL = require("../../Config/config").FRONTEND_URL;
 const redis_client = require("../../Utils/redisConnection");
-const createOrder = async (req, res) => {
+const customErrorHandler = require("../../Services/customErrorHandler");
+
+const createOrder = async (req, res, next) => {
   try {
     const {
       userId,
@@ -86,16 +88,12 @@ const createOrder = async (req, res) => {
       orderId: newOrder._id,
       paymentId: newOrder.paymentId,
     });
-  } catch (err) {
-    or(err);
-    res.status(500).json({
-      success: false,
-      msg: "Error creating PayPal order",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const capturePayment = async (req, res) => {
+const capturePayment = async (req, res, next) => {
   try {
     const { paymentId, payerId, orderId } = req.body;
 
@@ -117,21 +115,17 @@ const capturePayment = async (req, res) => {
     // Reduce stock
     for (let item of order.cartItems) {
       let product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          msg: `Product not found: ${item.title}`,
-        });
-      }
+      if (!product)
+        next(customErrorHandler.notFound(`Product not found: ${item.title}`));
       product.totalStock -= item.quantity;
       await product.save();
     }
 
-    const cart=await Cart.findByIdAndDelete(order.cartId);
+    const cart = await Cart.findByIdAndDelete(order.cartId);
     await order.save();
-    const redis_exists=await redis_client.exists('all_orderList');
-    if(redis_exists){
-      await redis_client.del('all_orderList');
+    const redis_exists = await redis_client.exists("all_orderList");
+    if (redis_exists) {
+      await redis_client.del("all_orderList");
       await redis_client.del(`${cart.userId}_orderList`);
     }
     res.status(200).json({
@@ -140,13 +134,12 @@ const capturePayment = async (req, res) => {
       data: order,
       captureResult: captureResponse.result,
     });
-  } catch (err) {
-    or(err);
-    res.status(500).json({ success: false, msg: "Payment capture failed" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getAllOrdersByUser = async (req, res) => {
+const getAllOrdersByUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const redis_data = await redis_client.get(`${userId}_orderList`);
@@ -160,12 +153,7 @@ const getAllOrdersByUser = async (req, res) => {
 
     const orders = await Order.find({ userId });
 
-    if (!orders.length) {
-      return res.status(404).json({
-        success: false,
-        msg: "No orders found!",
-      });
-    }
+    if (!orders.length) next(customErrorHandler.notFound("No Orders Found"));
     await redis_client.set(
       `${userId}_orderList`,
       JSON.stringify({
@@ -179,16 +167,12 @@ const getAllOrdersByUser = async (req, res) => {
       success: true,
       data: orders,
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured!",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getOrderDetails = async (req, res) => {
+const getOrderDetails = async (req, res, next) => {
   try {
     const { id } = req.params;
     const redis_data = await redis_client.get(`${id}_order_details`);
@@ -198,12 +182,7 @@ const getOrderDetails = async (req, res) => {
     }
     const order = await Order.findById(id);
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        msg: "Order not found!",
-      });
-    }
+    if (!order) next(customErrorHandler.notFound("No Orders Found"));
     await redis_client.set(
       `${id}_order_details`,
       JSON.stringify({
@@ -216,12 +195,8 @@ const getOrderDetails = async (req, res) => {
       success: true,
       data: order,
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured!",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

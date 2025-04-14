@@ -1,5 +1,5 @@
 const Product = require("../../Models/Product");
-const getFilteredProduct = async (req, res) => {
+const getFilteredProduct = async (req, res, next) => {
   try {
     const { category = [], brand = [], sortBy = "price-lowtohigh" } = req.query;
     let filters = {};
@@ -38,24 +38,21 @@ const getFilteredProduct = async (req, res) => {
     res
       .status(200)
       .json({ success: true, msg: "Products Fetched", data: products });
-  } catch (err) {
-    or(err);
-    res.status(500).json({ success: false, msg: "Failed to fetch product" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getProductDetails=async(req,res)=>{
-    try{
-        const {id}=req.params;
-        const product=await Product.findById({_id:id});
-        
-        if(!product) return res.status(404).json({success:false,msg:"Product Not Found"});
-        res.status(200).json({success:true,data:product});
-    }
-    catch(err){
-        or(err);
-        res.status(500).json({success:false,msg:"Failed to get details"});
-    }
-}
+const getProductDetails = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById({ _id: id });
+
+    if (!product) next(customErrorHandler.notFound("No Products Found"));
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = { getFilteredProduct, getProductDetails };

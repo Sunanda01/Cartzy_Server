@@ -1,11 +1,11 @@
 const Order = require("../../Models/Order");
 const redis_client = require("../../Utils/redisConnection");
-const getAllOrder = async (req, res) => {
+const customErrorHandler = require("../../Services/customErrorHandler");
+const getAllOrder = async (req, res, next) => {
   try {
     const order = await Order.find();
 
-    if (!order)
-      return res.status(404).json({ success: false, msg: "No Orders Found" });
+    if (!order) return next(customErrorHandler.notFound("No Orders Found"));
     const redis_data = await redis_client.get(`all_orderList`);
     if (redis_data) {
       const parsed_data = JSON.parse(redis_data);
@@ -22,12 +22,12 @@ const getAllOrder = async (req, res) => {
       1800
     );
     res.status(200).json({ success: true, msg: "Orders Found", data: order });
-  } catch (err) {
-    res.status(500).json({ success: false, msg: "Failed to fetch order" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getOrderDetails = async (req, res) => {
+const getOrderDetails = async (req, res, next) => {
   try {
     const { id } = req.params;
     const redis_data = await redis_client.get(`${id}_order_details`);
@@ -37,12 +37,7 @@ const getOrderDetails = async (req, res) => {
     }
     const order = await Order.findById(id);
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        msg: "Order not found!",
-      });
-    }
+    if (!order) return next(customErrorHandler.notFound("No Orders Found"));
     await redis_client.set(
       `${id}_order_details`,
       JSON.stringify({
@@ -55,25 +50,17 @@ const getOrderDetails = async (req, res) => {
       success: true,
       data: order,
     });
-  } catch (e) {
-    res.status(500).json({
-      success: false,
-      msg: "Some error occured!",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { orderStatus } = req.body;
     const order = await Order.findById(id);
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        msg: "Order not found!",
-      });
-    }
+    if (!order) return next(customErrorHandler.notFound("No Orders Found"));
     await Order.findByIdAndUpdate(id, { orderStatus });
 
     await redis_client.set(
@@ -89,11 +76,8 @@ const updateOrderStatus = async (req, res) => {
       success: true,
       msg: "Order status is updated successfully!",
     });
-  } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

@@ -1,6 +1,7 @@
 const Address = require("../../Models/Address");
-const {addressValidationSchema}=require('../../Validators')
-const addAddress = async (req, res) => {
+const { addressValidationSchema } = require("../../Validators");
+
+const addAddress = async (req, res, next) => {
   try {
     await addressValidationSchema.validateAsync(req.body);
     const { userId, address, city, pincode, phone, notes } = req.body;
@@ -27,20 +28,12 @@ const addAddress = async (req, res) => {
       data: newlyCreatedAddress,
       msg: "New Address Added",
     });
-  } catch (err) {
-    if (err.isJoi) {
-      return res
-        .status(400)
-        .json({ success: false, msg: err.details[0].message });
-    }
-    res.status(500).json({
-      success: false,
-      msg: "Failed to add address",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const fetchAllAddress = async (req, res) => {
+const fetchAllAddress = async (req, res, next) => {
   try {
     const { userId } = req.params;
     if (!userId) {
@@ -56,16 +49,12 @@ const fetchAllAddress = async (req, res) => {
       data: addressList,
       msg: "Saved Address",
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      msg: "Failed to fetch address",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const editAddress = async (req, res) => {
+const editAddress = async (req, res, next) => {
   try {
     const { userId, addressId } = req.params;
     const formData = req.body;
@@ -98,16 +87,12 @@ const editAddress = async (req, res) => {
       data: address,
       msg: "Address updated successfully",
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      msg: "Failed to update Address",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res, next) => {
   try {
     const { userId, addressId } = req.params;
     if (!userId || !addressId) {
@@ -130,12 +115,8 @@ const deleteAddress = async (req, res) => {
       success: true,
       msg: "Address deleted successfully",
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      msg: "Failed to delete Address",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

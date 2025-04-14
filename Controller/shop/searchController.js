@@ -1,6 +1,6 @@
 const Product =require('../../Models/Product');
 
-const searchProducts = async (req, res) => {
+const searchProducts = async (req,res,next) => {
   try {
     const { keyword } = req.params;
     if (!keyword || typeof keyword !== "string") {
@@ -24,10 +24,7 @@ const searchProducts = async (req, res) => {
       data: searchResults,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      msg: "Error",
-    });
+    next(error);
   }
 };
 

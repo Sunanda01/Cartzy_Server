@@ -2,7 +2,7 @@ const Order = require("../../Models/Order");
 const Product = require("../../Models/Product");
 const ProductReview = require("../../Models/Review");
 
-const addProductReview = async (req, res) => {
+const addProductReview = async (req, res, next) => {
   try {
     const { productId, userId, userName, reviewMessage, reviewValue } =
       req.body;
@@ -54,16 +54,12 @@ const addProductReview = async (req, res) => {
       success: true,
       data: newReview,
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      message: "Error",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getProductReviews = async (req, res) => {
+const getProductReviews = async (req, res, next) => {
   try {
     const { productId } = req.params;
 
@@ -72,12 +68,8 @@ const getProductReviews = async (req, res) => {
       success: true,
       data: reviews,
     });
-  } catch (e) {
-    
-    res.status(500).json({
-      success: false,
-      message: "Error",
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

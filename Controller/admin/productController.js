@@ -4,19 +4,20 @@ const {
   productValidationSchema,
   updateProductValidationSchema,
 } = require("../../Validators");
+const customErrorHandler = require("../../Services/customErrorHandler");
 
-const handleImageUpload = async (req, res) => {
+const handleImageUpload = async (req, res, next) => {
   try {
     const b64 = Buffer.from(req.file.buffer).toString("base64");
     const url = "data:" + req.file.mimetype + ";base64," + b64;
     const result = await imageUploadUtil(url);
     res.json({ success: true, result });
-  } catch (err) {
-    res.json({ success: false, msg: "Error Occurred" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const addProduct = async (req, res) => {
+const addProduct = async (req, res, next) => {
   try {
     await productValidationSchema.validateAsync(req.body);
     const {
@@ -43,27 +44,21 @@ const addProduct = async (req, res) => {
     res
       .status(201)
       .json({ success: true, msg: "Product Added", data: newlyCreatedProduct });
-  } catch (err) {
-    if (err.isJoi) {
-      return res
-        .status(400)
-        .json({ success: false, msg: err.details[0].message });
-    }
-    res.status(500).json({ success: false, msg: "Failed to Add Product" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const fetchAllProduct = async (req, res) => {
+const fetchAllProduct = async (req, res, next) => {
   try {
     const listOfProduct = await Product.find({});
     res.status(200).json({ success: true, data: listOfProduct });
-  } catch (err) {
-    or(err);
-    res.status(500).json({ success: false, msg: "Failed to Fetch Product" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const editProduct = async (req, res) => {
+const editProduct = async (req, res, next) => {
   try {
     await updateProductValidationSchema.validateAsync(req.body);
     const { id } = req.params;
@@ -77,9 +72,8 @@ const editProduct = async (req, res) => {
       totalStock,
     } = req.body;
     let findProduct = await Product.findById(id);
-    if (!findProduct) {
-      return res.status(404).json({ success: false, msg: "Product Not Found" });
-    }
+    if (!findProduct)
+      return next(customErrorHandler.notFound("Product Not Found"));
     findProduct.title = title || findProduct.title;
     findProduct.description = description || findProduct.description;
     findProduct.category = category || findProduct.category;
@@ -92,28 +86,21 @@ const editProduct = async (req, res) => {
     res
       .status(200)
       .json({ success: true, msg: "Product Updated Successfully" });
-  } catch (err) {
-    if (err.isJoi) {
-      return res
-        .status(400)
-        .json({ success: false, msg: err.details[0].message });
-    }
-    res.status(500).json({ success: false, msg: "Failed to Edit Product" });
+  } catch (error) {
+    next(error);
   }
 };
 
-const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);
-    if (!product)
-      return res.status(404).json({ success: false, msg: "Product Not Found" });
+    if (!product) return next(customErrorHandler.notFound("Product Not Found"));
     res
       .status(200)
       .json({ success: true, msg: "Product Deleted Successfully" });
-  } catch (err) {
-    or(err);
-    res.status(500).json({ success: false, msg: "Failed to Delete Product" });
+  } catch (error) {
+    next(error);
   }
 };
 
