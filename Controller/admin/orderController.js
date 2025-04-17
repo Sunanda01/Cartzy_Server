@@ -20,9 +20,9 @@ const getAllOrder = async (req, res, next) => {
       "EX",
       1800
     );
-    res.status(200).json({ success: true, msg: "Orders Found", data: order });
+    return res.status(200).json({ success: true, msg: "Orders Found", data: order });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -45,12 +45,12 @@ const getOrderDetails = async (req, res, next) => {
       "EX",
       1800
     );
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: order,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -71,12 +71,12 @@ const updateOrderStatus = async (req, res, next) => {
     await redis_client.del(`${id}_order_details`);
     await redis_client.del(`${order.userId}_orderList`);
     await redis_client.del("all_orderList");
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "Order status is updated successfully!",
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

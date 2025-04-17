@@ -25,9 +25,9 @@ const addToCart = async (req, res, next) => {
       cart.items[findCurrentProductIndex].quantity += quantity;
     }
     await cart.save();
-    res.status(200).json({ success: true, msg: "Added to Cart", data: cart });
+    return res.status(200).json({ success: true, msg: "Added to Cart", data: cart });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -58,13 +58,13 @@ const fetchCart = async (req, res, next) => {
       salePrice: item.productId.salePrice,
       quantity: item.quantity,
     }));
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "Product Fetched Successfully",
       data: { ...cart._doc, items: populateCartItems },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -98,13 +98,13 @@ const updateCart = async (req, res, next) => {
       salePrice: item.productId ? item.productId.salePrice : null,
       quantity: item.quantity,
     }));
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "Cart Updated Successfully",
       data: { ...cart._doc, items: populateCartItems },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -137,13 +137,13 @@ const deleteCart = async (req, res, next) => {
       salePrice: item.productId ? item.productId.salePrice : null,
       quantity: item.quantity,
     }));
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "Product Removed From Cart",
       data: { ...cart._doc, items: populateCartItems },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

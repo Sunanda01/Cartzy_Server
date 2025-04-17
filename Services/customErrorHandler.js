@@ -11,6 +11,10 @@ class CustomErrorHandler extends Error {
   }
 
   static wrongCredentials(message = "Your email & password is wrong") {
+    return new CustomErrorHandler(402, message);
+  }
+
+  static tokenError(message = "Token Error") {
     return new CustomErrorHandler(401, message);
   }
 

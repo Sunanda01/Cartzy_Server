@@ -11,9 +11,8 @@ const router = require("express").Router();
 
 router.post(
   "/upload-image",
-  verifyToken,
+  upload.single("my_file"),verifyToken,
   verifyAdmin,
-  upload.single("my_file"),
   handleImageUpload
 );
 router.post("/add", verifyToken, verifyAdmin, addProduct);

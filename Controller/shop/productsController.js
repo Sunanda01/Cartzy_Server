@@ -35,11 +35,11 @@ const getFilteredProduct = async (req, res, next) => {
     }
 
     const products = await Product.find(filters).sort(sort);
-    res
+    return res
       .status(200)
       .json({ success: true, msg: "Products Fetched", data: products });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -48,10 +48,10 @@ const getProductDetails = async (req, res, next) => {
     const { id } = req.params;
     const product = await Product.findById({ _id: id });
 
-    if (!product) next(customErrorHandler.notFound("No Products Found"));
-    res.status(200).json({ success: true, data: product });
+    if (!product) return next(customErrorHandler.notFound("No Products Found"));
+    return res.status(200).json({ success: true, data: product });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

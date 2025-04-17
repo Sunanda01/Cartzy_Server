@@ -27,13 +27,13 @@ const addAddress = async (req, res, next) => {
 
     await newlyCreatedAddress.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: newlyCreatedAddress,
       msg: "New Address Added",
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -48,13 +48,13 @@ const fetchAllAddress = async (req, res, next) => {
     }
 
     const addressList = await Address.find({ userId });
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: addressList,
       msg: "Saved Address",
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -90,13 +90,13 @@ const editAddress = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: address,
       msg: "Address updated successfully",
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -119,12 +119,12 @@ const deleteAddress = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "Address deleted successfully",
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

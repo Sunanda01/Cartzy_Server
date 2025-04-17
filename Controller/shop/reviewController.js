@@ -50,12 +50,12 @@ const addProductReview = async (req, res, next) => {
 
     await Product.findByIdAndUpdate(productId, { averageReview });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: newReview,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -64,12 +64,12 @@ const getProductReviews = async (req, res, next) => {
     const { productId } = req.params;
 
     const reviews = await ProductReview.find({ productId });
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: reviews,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

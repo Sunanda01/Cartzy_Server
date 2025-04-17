@@ -24,7 +24,7 @@ const searchProducts = async (req,res,next) => {
       data: searchResults,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

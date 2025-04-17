@@ -54,7 +54,7 @@ const registerUser = async (req, res, next) => {
       "EX",
       1800
     );
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       msg: "User Registered Successfully",
       token,
@@ -66,7 +66,7 @@ const registerUser = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -119,7 +119,7 @@ const loginUser = async (req, res, next) => {
       1800
     );
 
-    res.json({
+    return res.json({
       success: true,
       msg: "Logged in successfully",
       token,
@@ -131,24 +131,32 @@ const loginUser = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 const checkAuth = async (req, res, next) => {
-  const user = req.user;
-  res.status(200).json({
-    success: true,
-    msg: "Authenticated User",
-    user,
-  });
+  try {
+    const user = req.user;
+    return res.status(200).json({
+      success: true,
+      msg: "Authenticated User",
+      user,
+    });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 const logoutUser = async (req, res, next) => {
-  res.clearCookie("token").json({
-    success: true,
-    msg: "Logged Out Successfully!",
-  });
+  try {
+    return res.status(200).json({
+      success: true,
+      msg: "Logged Out Successfully!",
+    });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 module.exports = { registerUser, loginUser, logoutUser, checkAuth };

@@ -5,5 +5,5 @@ const {
 } = require("../../Controller/admin/featureContoller");
 const { verifyToken, verifyAdmin } = require("../../Middleware/verification");
 routes.post("/add", verifyToken, verifyAdmin, addFeatureImage);
-routes.get("/get", verifyToken, verifyAdmin, getFeatureImages);
+routes.get("/get", verifyToken, getFeatureImages);
 module.exports = routes;

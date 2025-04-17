@@ -82,14 +82,14 @@ const createOrder = async (req, res, next) => {
 
     await newOrder.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       approvalURL: approvalLink,
       orderId: newOrder._id,
       paymentId: newOrder.paymentId,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -116,7 +116,9 @@ const capturePayment = async (req, res, next) => {
     for (let item of order.cartItems) {
       let product = await Product.findById(item.productId);
       if (!product)
-        next(customErrorHandler.notFound(`Product not found: ${item.title}`));
+        return next(
+          customErrorHandler.notFound(`Product not found: ${item.title}`)
+        );
       product.totalStock -= item.quantity;
       await product.save();
     }
@@ -135,7 +137,7 @@ const capturePayment = async (req, res, next) => {
       captureResult: captureResponse.result,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -153,7 +155,8 @@ const getAllOrdersByUser = async (req, res, next) => {
 
     const orders = await Order.find({ userId });
 
-    if (!orders.length) next(customErrorHandler.notFound("No Orders Found"));
+    if (!orders.length)
+      return next(customErrorHandler.notFound("No Orders Found"));
     await redis_client.set(
       `${userId}_orderList`,
       JSON.stringify({
@@ -163,12 +166,12 @@ const getAllOrdersByUser = async (req, res, next) => {
       1800
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: orders,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -182,7 +185,7 @@ const getOrderDetails = async (req, res, next) => {
     }
     const order = await Order.findById(id);
 
-    if (!order) next(customErrorHandler.notFound("No Orders Found"));
+    if (!order) return next(customErrorHandler.notFound("No Orders Found"));
     await redis_client.set(
       `${id}_order_details`,
       JSON.stringify({
@@ -191,12 +194,12 @@ const getOrderDetails = async (req, res, next) => {
       "EX",
       1800
     );
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: order,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

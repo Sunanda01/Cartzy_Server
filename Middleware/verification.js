@@ -13,10 +13,10 @@ async function verifyToken(req, res, next) {
     token = req.headers.authorization.split(" ")[1];
   } else {
     return next(
-      CustomErrorHandler.unAuthorized("Not authorised, no token provided")
+      CustomErrorHandler.tokenError("Not authorised, no token provided")
     );
   }
-  if (!token) next(CustomErrorHandler.notFound("Token Not Found"));
+  if (!token) return next(CustomErrorHandler.tokenError("Token Not Found"));
   try {
     const decoded = jwt.verify(token, JWTHASHVALUE);
     const redis_exists = await redis_client.exists(token);
@@ -28,12 +28,12 @@ async function verifyToken(req, res, next) {
 
     // fallback if Redis doesn't have the token
     const user = await User.findById(decoded.id).select("-password");
-    if (!user) next(CustomErrorHandler.notFound("User Not Found"));
+    if (!user) return next(CustomErrorHandler.tokenError("User Not Found"));
 
     req.user = user;
-    next();
+    return next();
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
