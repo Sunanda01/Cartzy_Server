@@ -27,13 +27,13 @@ async function verifyToken(req, res, next) {
     }
 
     // fallback if Redis doesn't have the token
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded.id).select("-password,-__v");
     if (!user) return next(CustomErrorHandler.tokenError("User Not Found"));
 
     req.user = user;
     return next();
   } catch (error) {
-    return next(error);
+    return next(CustomErrorHandler.tokenError("Error in decoding Token"));
   }
 }
 
@@ -44,7 +44,7 @@ function verifyAdmin(req, res, next) {
     }
     return next(CustomErrorHandler.unAuthorized("Unauthorized user"));
   } catch (error) {
-    return next(error);
+    return next(CustomErrorHandler.tokenError("Error in decoding Token"));
   }
 }
 module.exports = { verifyToken, verifyAdmin };

@@ -2,8 +2,7 @@ const express = require("express");
 const PORT = require("./Config/config").PORT;
 const connection = require("./Utils/connection");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const FRONTEND_URL = require("./Config/config").FRONTEND_URL;
+// const FRONTEND_URL = require("./Config/config").FRONTEND_URL;
 const authRoutes = require("./Routes/auth/authRoutes");
 const productRoutes=require("./Routes/admin/productRoutes");
 const shopProductRoutes=require("./Routes/shop/productRoutes");
@@ -19,7 +18,6 @@ const errorHandler=require('./Middleware/errorHandler');
 const healthcheckroute = require("./Routes/health");
 
 const app = express();
-app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
