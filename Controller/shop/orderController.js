@@ -6,7 +6,7 @@ const client = require("../../Services/paypal");
 const FRONTEND_URL = require("../../Config/config").FRONTEND_URL;
 const redis_client = require("../../Utils/redisConnection");
 const customErrorHandler = require("../../Services/customErrorHandler");
-
+const INR_TO_USD_RATE = 83.25;
 const createOrder = async (req, res, next) => {
   try {
     const {
@@ -22,16 +22,27 @@ const createOrder = async (req, res, next) => {
       cartId,
     } = req.body;
 
-    const items = cartItems.map((item) => ({
-      name: item.title,
-      unit_amount: {
-        currency_code: "USD",
-        value: item.price.toFixed(2),
-      },
-      quantity: item.quantity.toString(),
-      description: item.title,
-      sku: item.productId,
-    }));
+    const items = cartItems.map((item) => {
+      const unitPriceUSD = item.price / INR_TO_USD_RATE;
+      return {
+        name: item.title,
+        unit_amount: {
+          currency_code: "USD",
+          value: unitPriceUSD.toFixed(2),
+        },
+        quantity: item.quantity.toString(),
+        description: item.title,
+        sku: item.productId,
+      };
+    });
+
+    const totalAmountUSD = items
+      .reduce((sum, item) => {
+        return (
+          sum + parseFloat(item.unit_amount.value) * parseInt(item.quantity)
+        );
+      }, 0)
+      .toFixed(2);
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
@@ -41,11 +52,11 @@ const createOrder = async (req, res, next) => {
         {
           amount: {
             currency_code: "USD",
-            value: totalAmount.toFixed(2),
+            value: totalAmountUSD,
             breakdown: {
               item_total: {
                 currency_code: "USD",
-                value: totalAmount.toFixed(2),
+                value: totalAmountUSD,
               },
             },
           },
