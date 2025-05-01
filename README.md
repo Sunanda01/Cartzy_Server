@@ -2,7 +2,7 @@
 🔗 **Link**: [https://github.com/Sunanda01/Cartzy_Client.git](https://github.com/Sunanda01/Cartzy_Client.git)
 
 ## Get Started
-Here I have actually kept the frontend of Cartzy web application.
+Here I have actually kept the backend of Cartzy web application.
 
 ## Clone the repo
 First, clone the repo:
